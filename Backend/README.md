@@ -72,4 +72,72 @@ Notes:
 ```bash
 curl -X POST http://localhost:3000/users/register \
   -H "Content-Type: application/json" \
-  -
+  -d '{"fullname":{"firstname":"Alice","lastname":"Smith"},"email":"alice@example.com","password":"supersecret"}'
+```
+
+# Login — POST /users/login
+
+Authenticate an existing user and receive an authentication token.
+
+- URL: `/users/login`
+- Method: `POST`
+- Content-Type: `application/json`
+
+Request headers:
+- `Content-Type: application/json`
+
+Request body (JSON):
+- `email` (string) — required, must be a valid email
+- `password` (string) — required
+
+Example:
+```json
+{
+  "email": "alice@example.com",
+  "password": "supersecret"
+}
+```
+
+Validation rules:
+- `email` — must be a valid email address
+- `password` — required (not empty)
+
+Success response:
+- Status: `200 OK`
+- Body:
+```json
+{
+  "token": "<jwt-token>",
+  "user": {
+    "_id": "<user-id>",
+    "fullname": {
+      "firstname": "Alice",
+      "lastname": "Smith"
+    },
+    "email": "alice@example.com",
+    "socketID": null,
+    "__v": 0
+  }
+}
+```
+Notes:
+- The `token` is a JWT (expires in 1 hour).
+- The returned `user` should not include the password field. (If the implementation selects the password to verify credentials, ensure it is removed before sending the response.)
+
+Common error responses:
+- `400 Bad Request` — validation failed. Example:
+```json
+{ "errors": [ { "msg": "Invalid email address", "param": "email", ... } ] }
+```
+- `401 Unauthorized` — invalid email or password. Example:
+```json
+{ "message": "Invalid email or password" }
+```
+- `500 Internal Server Error` — unexpected server error.
+
+Example curl:
+```bash
+curl -X POST http://localhost:3000/users/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"supersecret"}'
+```
